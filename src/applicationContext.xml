@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:tool="http://www.springframework.org/schema/tool" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/jee
+           http://www.springframework.org/schema/jee/spring-jee.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util.xsd
+           http://www.springframework.org/schema/tool
+           http://www.springframework.org/schema/tool/spring-tool.xsd"
+    default-autowire="no">
+	<!-- default-lazy-init="true" default-autowire="byName"> -->
+	
+	<!-- 该配置文件只加载除表现层之外的所有bean -->
+	<!-- 通过exclude-filter 把所有@Controller注解的表现层控制器组件排除 -->
+	<!-- <context:component-scan base-package="cn.javass">  
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>  
+	</context:component-scan> -->
+	
+	<!-- 数据库连接池 -->  
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/cn.com.sway.cms?useUnicode=true&amp;characterEncoding=utf-8"></property>
+		<property name="user" value="root"></property>
+		<property name="password" value=""></property>
+		<!-- <property name="autoCommitOnClose" value="true"></property> -->
+	</bean>
+	
+	<!-- hibernate sessionFactory 创建 -->
+	<!-- hibernate.cfg.xml Spring config -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<!-- connection -->
+		<property name="dataSource">
+			<ref local="dataSource" />
+		</property>
+		<!-- hibernate 类文件配置 -->
+		<!-- hibernate自身属性 -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- 显示Hibernate 持久化操作所生成的SQL -->
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- 将SQL脚本进行格式化后在输出 -->
+				<!-- <prop key="hibernate.format_sql">true</prop> -->
+				<!-- 指定数据库方言 -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<!-- **************** -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<!-- 解决no session found -->
+				<!-- <prop key="hibernate.current_session_context_class">thread</prop> -->
+			</props>
+		</property>
+		<!-- 映射文件 -->
+		<property name="mappingResources">
+			<list>
+				<value>cn/com/sway/cms/account/model/Account.hbm.xml</value>
+				<value>cn/com/sway/cms/config/model/Config.hbm.xml</value>
+				<value>cn/com/sway/cms/navi/model/Navi.hbm.xml</value>
+				<value>cn/com/sway/cms/page/model/Page.hbm.xml</value>
+				<value>cn/com/sway/cms/archive/model/Archive.hbm.xml</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 让spring认识annotation -->
+	<context:annotation-config/>
+	<!-- 让它去org.annotation去扫描它需要的东西 -->
+    <context:component-scan base-package="cn.com.sway"/>
+	
+	<!-- 开启AOP监听 只对当前配置文件有效 -->
+	<aop:aspectj-autoproxy expose-proxy="true"/>
+	
+	<!-- 开启注解事务 只对当前配置文件有效 -->
+  	<tx:annotation-driven transaction-manager="txManager"/>
+  	
+	<bean id="txManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="save*" propagation="REQUIRED" />
+            <tx:method name="add*" propagation="REQUIRED" />
+            <tx:method name="create*" propagation="REQUIRED" />
+            <tx:method name="insert*" propagation="REQUIRED" />
+            <tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="merge*" propagation="REQUIRED" />
+            <tx:method name="del*" propagation="REQUIRED" />
+            <tx:method name="remove*" propagation="REQUIRED" />
+            <tx:method name="put*" propagation="REQUIRED" />
+            <tx:method name="use*" propagation="REQUIRED"/>
+            <!--hibernate4必须配置为开启事务 否则 getCurrentSession()获取不到-->
+            <tx:method name="get*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="count*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="find*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="list*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="*" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+    <aop:config expose-proxy="true">
+        <!-- 只对业务逻辑层实施事务 -->
+        <!-- <aop:pointcut id="txPointcut" expression="execution(* cn.javass..service..*.*(..))" /> -->
+        <!-- <aop:pointcut id="txPointcut" expression="execution(* cp.ic..dao..*.*(..))" /> -->
+        <!-- <aop:pointcut id="txPointcut" expression="execution(* cp.ic..dao..*.*(..))" /> -->
+        <aop:pointcut id="txPointcut" expression="execution(* cn.com.sway..dao..*.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>
+    </aop:config>
+
+	<!-- autoproxy 自动创建代理 -->
+	<!-- <bean id="ProxyCreator"
+		class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames">
+			<list>
+				<value>*Biz</value>
+			</list>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>transactionInterceptor</value>
+			</list>
+		</property>
+	</bean> -->
+	
+	
+	<!-- SpringMail配置 -->
+	<!-- 注意:这里的参数(如用户名、密码)都是针对邮件发送者的 -->
+	<!-- <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.exmail.qq.com"/>
+		<property name="javaMailProperties">
+			<props>-->
+				<!-- 如果要使用用户名和密码验证,这一步需要 -->
+				<!-- <prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.timeout">25000</prop>
+			</props>
+		</property>
+		<property name="username" value="system@sway.com.cn"/>  
+		<property name="password" value="1301862750abc"/> 
+	</bean> -->
+    
+</beans>

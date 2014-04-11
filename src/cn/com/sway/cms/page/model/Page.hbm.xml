@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE hibernate-mapping PUBLIC
+     "-//Hibernate/Hibernate Hibernate-mapping DTD 3.0//EN"
+     "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<class name="cn.com.sway.cms.page.model.Page">
+		<id name="id">
+			<generator class="uuid2" />
+		</id>
+		<property name="name" not-null="true"/>
+		<property name="orderNum" not-null="true"/>
+		<property name="html" type="text"/>
+		<property name="htmlForMobile" type="text"/>
+		<property name="templateFile"/>
+		<property name="templateFileForMobile"/>
+		
+		<bag name="archives" inverse="true" cascade="delete" order-by="datetime DESC">  
+		    <key column="page" />  
+		    <one-to-many class="cn.com.sway.cms.archive.model.Archive"/>
+		</bag>
+		
+		<many-to-one name="parent"/>
+		
+		<bag name="children" inverse="true" cascade="delete" order-by="orderNum">  
+		    <key column="parent" />  
+		    <one-to-many class="cn.com.sway.cms.page.model.Page"/>  
+		</bag>
+		
+	</class>
+
+</hibernate-mapping>
