@@ -27,7 +27,7 @@ obj.src="rand.action?d="+timenow;
 } 
 </script> 
 
-<div style="width:340px; height:150px; border:1px solid #DDD; padding:5px; position:absolute; left:50%; top:50%; margin-left:-171px; margin-top:-76px;">
+<div style="width:340px; height:180px; border:1px solid #DDD; padding:5px; position:absolute; left:50%; top:50%; margin-left:-170px; margin-top:-90px;">
 	<div style="color:#FFF; font-weight:bold; text-align:center; background-color: #999; margin-top: 10px; margin-bottom: 10px;">账号登录</div>
 	<s:form action="loginCheck" namespace="/account" method="post" theme="simple">
 		<div>账&nbsp;&nbsp;号: <s:textfield name="account.username" label="账 号"/></div><div><s:fielderror fieldName="account.username"/></div>
@@ -39,6 +39,7 @@ obj.src="rand.action?d="+timenow;
 		</div><div><s:fielderror fieldName="captcha"/></div>
 		<div style="padding-left:100px;"><s:submit value="提交"/></div>
 	</s:form>
+	<div style="color:#FFF; font-weight:bold; text-align:center; background-color: #999; margin-top: 10px; margin-bottom: 10px;">技术支持：由<a target="_blank" href="http://www.xinsiwei.net.cn">新思维</a>提供<a target="_blank" href="http://www.xinsiwei.net.cn">网络营销外包</a>服务</div>
 </div>
 
 </body>
